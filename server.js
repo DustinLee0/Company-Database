@@ -15,6 +15,7 @@ const connection = mysql.createConnection(
   console.log('Connected to company_db database.')
 );
 
+//start app when app is called
 const initialize = () => {
   inquirer
     .prompt([
@@ -31,15 +32,14 @@ const initialize = () => {
       switch (choice) {
         case 'View all Departments':
           viewDepartments();
-
           break;
 
         case 'View all Roles':
           viewRoles();
-
           break;
-        case 'View all Employees':
 
+        case 'View all Employees':
+        viewEmployees();
           break;
       }
 
@@ -51,20 +51,21 @@ initialize();
 
 const viewDepartments = () => {
   connection.query('SELECT * FROM departments', (err, data) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+    if (err) throw err;
     console.table(data);
   })
 }
 
 const viewRoles = () => {
   connection.query('SELECT roles.id, roles.title, departments.department AS department, roles.salary FROM roles JOIN departments ON roles.department_id = departments.id;', (err, data) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+    if (err) throw err;
+    console.table(data);
+  })
+}
+
+const viewEmployees = () => {
+  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id ORDER BY employees.id;', (err, data) => {
+    if (err) throw err;
     console.table(data);
   })
 }

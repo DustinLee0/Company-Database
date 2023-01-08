@@ -7,7 +7,6 @@ CREATE TABLE departments (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     department VARCHAR(30) NOT NULL
 );
-SELECT * FROM departments;
 
 CREATE TABLE roles (
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
@@ -19,16 +18,17 @@ CREATE TABLE roles (
     ON DELETE SET NULL
 );
 
-SELECT * FROM roles;
-
-CREATE TABLE employee (
-    id INT NOT NULL PRIMARY KEY,
+CREATE TABLE employees (
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     first_name VARCHAR(30) NOT NULL,
     last_name VARCHAR(30) NOT NULL,
     role_id INT,
-    manager_id INT NULL,
+    manager_id INT,
     FOREIGN KEY (role_id)
     REFERENCES roles(id)
     ON DELETE SET NULL
 );
-SELECT * FROM employee;
+
+SELECT * FROM departments;
+SELECT * FROM roles;
+SELECT * FROM employees;
