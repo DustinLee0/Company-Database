@@ -267,9 +267,10 @@ const updateEmployee = () => {
           // console.log(choice);
           let employee = choice.employee.split(' ');
           let roleID = roles.indexOf(choice.role) + 1;
+          let managerID;
 
           // set manager id's when roles are changed
-          if (roleID === 1 || 3 || 5 || 7) {
+          if (roleID === 1 || roleID === 3 || roleID === 5 || roleID === 7) {
             managerID = null;
           } else if (roleID === 2) {
             managerID = 3;
@@ -280,7 +281,7 @@ const updateEmployee = () => {
           } else if (roleID === 8) {
             managerID = 7;
           }
-
+          console.log('roleid: ', roleID, 'managerid: ', managerID);
           connection.query('UPDATE employees SET role_id = ?, manager_id = ? WHERE first_name = ?', [roleID, managerID, employee[0]], (err, data) => {
             if (err) throw err;
             console.log(`Updated ${choice.employee}'s role to ${choice.role}`);
