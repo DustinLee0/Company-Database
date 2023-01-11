@@ -269,20 +269,14 @@ const updateEmployee = () => {
           let roleID = roles.indexOf(choice.role) + 1;
 
           // set manager id's when roles are changed
-          if (roleID === 1) {
+          if (roleID === 1 || 3 || 5 || 7) {
             managerID = null;
           } else if (roleID === 2) {
             managerID = 3;
-          } else if (roleID === 3) {
-            managerID = null;
           } else if (roleID === 4) {
             managerID = 6;
-          } else if (roleID === 5) {
-            managerID = null;
           } else if (roleID === 6) {
             managerID = 1;
-          } else if (roleID === 7) {
-            managerID = null;
           } else if (roleID === 8) {
             managerID = 7;
           }
