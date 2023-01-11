@@ -32,31 +32,23 @@ const initialize = () => {
       switch (choice) {
         case 'View all Departments':
           viewDepartments();
-          console.log('\n');
-          initialize();
           break;
 
         case 'View all Roles':
           viewRoles();
-          console.log('\n');
-          initialize();
           break;
 
         case 'View all Employees':
           viewEmployees();
-          console.log('\n');
-          initialize();
           break;
 
         case 'Add a Department':
           addDepartment();
-          console.log('\n');
           break;
 
-          case 'Add a Role':
-            addDepartment();
-            console.log('\n');
-            break;
+        case 'Add a Role':
+          addRole();
+          break;
       }
 
     })
@@ -71,6 +63,7 @@ const viewDepartments = () => {
     if (err) throw err;
     console.log('Departments: ');
     console.table(data);
+    initialize();
   })
 }
 
@@ -79,6 +72,7 @@ const viewRoles = () => {
     if (err) throw err;
     console.log('Roles: ');
     console.table(data);
+    initialize();
   })
 }
 
@@ -87,6 +81,7 @@ const viewEmployees = () => {
     if (err) throw err;
     console.log('Employees: ');
     console.table(data);
+    initialize();
   })
 }
 
@@ -103,35 +98,49 @@ const addDepartment = () => {
       connection.query('INSERT INTO departments (department) VALUES (?)', choice.department, (err, data) => {
         if (err) throw err;
         console.log(`Added ${choice.department} to database.`);
-        console.table(data);
+        initialize();
       })
     })
 }
 
 const addRole = () => {
-  inquirer
-    .prompt([
-      {
-        type: 'input',
-        message: 'Enter the name of the role',
-        name: 'role'
-      },
-      {
-        type: 'input',
-        message: 'Enter the starting salary of the role',
-        name: 'salary'
-      },
-    //   {
-    //     type: 'list',
-    //     message: 'Which department does the role belong to?',
-    //     choices: [''],
-    //     name: 'choice'
-    // }
-    ]).then((choice) => {
-      connection.query('INSERT INTO departments (department) VALUES (?)', choice.department, (err, data) => {
-        if (err) throw err;
-        console.log(`Added ${choice.department} to database.`);
-        console.table(data);
-      })
+  //get data from department table to use for choices
+  connection.query('SELECT * FROM departments', (err, data) => {
+    if (err) throw err;
+
+    //declare variable to store list of department names
+    const departments = [];
+
+    data.forEach( (element) => {
+      departments.push(element.department);
     })
+
+    inquirer
+      .prompt([
+        {
+          type: 'input',
+          message: 'Enter the name of the role',
+          name: 'role'
+        },
+        {
+          type: 'input',
+          message: 'Enter the starting salary of the role',
+          name: 'salary'
+        },
+        {
+          type: 'list',
+          message: 'Which department does the role belong to?',
+          choices: departments,
+          name: 'department'
+        }
+      ]).then( (choice) => {
+        let departmentID = departments.indexOf(choice.department) + 1;
+        // console.log(departmentID);
+        connection.query('INSERT INTO roles (title, department_id, salary) VALUES (?, ?, ?)', [choice.role, departmentID, choice.salary], (err, data) => {
+          if (err) throw err;
+          console.log(`Added ${choice.role} to database.`);
+          initialize();
+        })
+      })
+  })
 }
