@@ -16,12 +16,12 @@ VALUES      ('Sales Lead', 1000000, 1),
 
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES  ('Anthony', 'Reagan', 5, null),
-        ('Elaine', 'Marshall', 6, 5),
+        ('Elaine', 'Marshall', 6, 1),
         ('Artie', 'Adams', 1, null),
-        ('Beth', 'Rus', 2, 1),
-        ('Spongebob', 'Squarepants', 4, 3),
+        ('Beth', 'Rus', 2, 3),
+        ('Spongebob', 'Squarepants', 4, 6),
         ('Patrick', 'Star', 3, null),
         ('Walter', 'White', 7, null),
         ('Hank', 'Schrader', 8, 7),
-        ('John', 'Doe', 2, 1),
-        ('Bob', 'Smith', 4, 3);
+        ('John', 'Doe', 2, 3),
+        ('Bob', 'Smith', 4, 6);

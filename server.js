@@ -68,7 +68,7 @@ initialize();
 
 // VIEW
 const viewDepartments = () => {
-  connection.query('SELECT * FROM departments', (err, data) => {
+  connection.query('SELECT * FROM departments;', (err, data) => {
     if (err) throw err;
     console.log('Departments: ');
     console.table(data);
@@ -86,7 +86,7 @@ const viewRoles = () => {
 }
 
 const viewEmployees = () => {
-  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id ORDER BY employees.id;', (err, data) => {
+  connection.query('SELECT employees.id, employees.first_name, employees.last_name, roles.title AS role, departments.department, roles.salary, employees.manager_id FROM employees JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.department_id = departments.id ORDER BY employees.id;', (err, data) => {
     if (err) throw err;
     console.log('Employees: ');
     console.table(data);
@@ -104,7 +104,7 @@ const addDepartment = () => {
         name: 'department'
       },
     ]).then((choice) => {
-      connection.query('INSERT INTO departments (department) VALUES (?)', choice.department, (err, data) => {
+      connection.query('INSERT INTO departments (department) VALUES (?);', choice.department, (err, data) => {
         if (err) throw err;
         console.log(`Added ${choice.department} to database.`);
         initialize();
@@ -114,7 +114,7 @@ const addDepartment = () => {
 
 const addRole = () => {
   //read data from department table to use for choices
-  connection.query('SELECT * FROM departments', (err, data) => {
+  connection.query('SELECT * FROM departments;', (err, data) => {
     if (err) throw err;
     //declare variable to store list of department names
     const departments = [];
@@ -144,8 +144,7 @@ const addRole = () => {
         }
       ]).then((choice) => {
         let departmentID = departments.indexOf(choice.department) + 1;
-        // console.log(departmentID);
-        connection.query('INSERT INTO roles (title, department_id, salary) VALUES (?, ?, ?)', [choice.role, departmentID, choice.salary], (err, data) => {
+        connection.query('INSERT INTO roles (title, department_id, salary) VALUES (?, ?, ?);', [choice.role, departmentID, choice.salary], (err, data) => {
           if (err) throw err;
           console.log(`Added ${choice.role} to database.`);
           initialize();
@@ -156,7 +155,7 @@ const addRole = () => {
 
 const addEmployee = () => {
   //get data from roles table to use for choices
-  connection.query('SELECT title FROM roles', (err, data) => {
+  connection.query('SELECT title FROM roles;', (err, data) => {
     if (err) throw err;
     //declare variable to store list of role names
     const roles = [];
@@ -165,51 +164,72 @@ const addEmployee = () => {
     data.forEach((title) => {
       roles.push(title.title);
     })
-    console.log(roles);
 
-    inquirer
-      .prompt([
-        {
-          type: 'input',
-          message: 'Enter the employee\'s first name.',
-          name: 'fName'
-        },
-        {
-          type: 'input',
-          message: 'Enter the employee\'s last name.',
-          name: 'lName'
-        },
-        {
-          type: 'list',
-          message: 'What is the employee\'s role?',
-          choices: roles,
-          name: 'empRole'
-        },
-        {
-          type: 'list',
-          message: 'Who is the employee\'s manager?',
-          choices: ['hello', 'there'],
-          name: 'manager'
-        }
-      ]).then((choice) => {
-        console.log(choice);
-        let roleID = roles.indexOf(choice.empRole) + 1;
-        console.log(roleID);
-        // connection.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', choice.fName, choice.lName, roleID, , (err, data) => {
-        // if (err) throw err;
-        // console.log(`Added ${choice.department} to database.`);
-        // initialize();
-        // })
+    connection.query('SELECT first_name, last_name, roles.title FROM employees JOIN roles ON employees.role_id = roles.id WHERE manager_id IS NULL;', (err, data) => {
+      if (err) throw err;
+      const managers = [];
+
+      data.forEach((manager) => {
+        managers.push(`${manager.title}: ` + `${manager.first_name} ` + `${manager.last_name}`);
       })
+
+      inquirer
+        .prompt([
+          {
+            type: 'input',
+            message: 'Enter the employee\'s first name.',
+            name: 'fName'
+          },
+          {
+            type: 'input',
+            message: 'Enter the employee\'s last name.',
+            name: 'lName'
+          },
+          {
+            type: 'list',
+            message: 'What is the employee\'s role?',
+            choices: roles,
+            name: 'empRole'
+          },
+          {
+            type: 'list',
+            message: 'Who is the employee\'s manager?',
+            choices: managers,
+            name: 'manager'
+          }
+        ]).then((choice) => {
+          const { fName, lName, empRole, manager } = choice;
+          let roleID = roles.indexOf(empRole) + 1;
+          let managerID;
+
+          if (manager === 'Accountant Manager: Anthony Reagan') {
+            managerID = 1;
+          } else if (manager === 'Sales Lead: Artie Adams') {
+            managerID = 3;
+          } else if (manager === 'Lead Engineer: Patrick Star') {
+            managerID = 6;
+          } else if(manager === 'Legal Team Lead: Walter White') {
+            managerID = 7;
+         }
+        //  console.log('roleid: ', roleID, 'managerid: ', managerID)
+          connection.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [fName, lName, roleID, managerID], (err, data) => {
+          if (err) throw err;
+          console.log(`Added ${fName} ` + `${lName} to database.`);
+          initialize();
+          })
+        })
+    })
   })
 }
 
+// UPDATE
 const updateEmployee = () => {
   //read employee data
   connection.query('SELECT first_name, last_name FROM employees', (err, data) => {
     if (err) throw err;
     const employees = [];
 
+    // add employee names to a list
     data.forEach((employee) => {
       employees.push(`${employee.first_name} ` + `${employee.last_name}`);
     })
@@ -242,7 +262,18 @@ const updateEmployee = () => {
           let employee = choice.employee.split(' ');
           let roleID = roles.indexOf(choice.role) + 1;
 
-          connection.query('UPDATE employees SET role_id = ? WHERE first_name = ?', [roleID, employee[0]], (err, data) => {
+
+          if (roleID === 2) {
+            managerID = 3;
+          } else if (roleID === 4) {
+            managerID = 6;
+          } else if (roleID === 6) {
+            managerID = 1;
+          } else if(roleID === 8) {
+            managerID = 7;
+         }
+
+          connection.query('UPDATE employees SET role_id = ?, manager_id = ? WHERE first_name = ?', [roleID, managerID, employee[0]], (err, data) => {
             if (err) throw err;
             console.log(`Updated ${choice.employee}'s role to ${choice.role}`);
             initialize();
