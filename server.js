@@ -264,7 +264,7 @@ const updateEmployee = () => {
             name: 'role'
           },
         ]).then((choice) => {
-          console.log(choice);
+          // console.log(choice);
           let employee = choice.employee.split(' ');
           let roleID = roles.indexOf(choice.role) + 1;
 
