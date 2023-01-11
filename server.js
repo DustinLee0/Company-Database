@@ -22,7 +22,7 @@ const initialize = () => {
       {
         type: 'list',
         message: 'What would you like to do?',
-        choices: ['View all Departments', 'Add a Department', 'View all Roles', 'Add a Role', 'View all Employees', 'Add an Employee', 'Update an Employee'],
+        choices: ['View all Departments', 'Add a Department', 'View all Roles', 'Add a Role', 'View all Employees', 'Add an Employee', 'Update an Employee', 'Exit'],
         name: 'choice'
       }
     ]).then((response) => {
@@ -58,8 +58,10 @@ const initialize = () => {
           updateEmployee();
           break;
 
+        case 'Exit':
+          console.log('Exiting application');
+          break;
       }
-
     })
 }
 
@@ -172,6 +174,7 @@ const addEmployee = () => {
       data.forEach((manager) => {
         managers.push(`${manager.title}: ` + `${manager.first_name} ` + `${manager.last_name}`);
       })
+      managers.push('None');
 
       inquirer
         .prompt([
@@ -208,14 +211,16 @@ const addEmployee = () => {
             managerID = 3;
           } else if (manager === 'Lead Engineer: Patrick Star') {
             managerID = 6;
-          } else if(manager === 'Legal Team Lead: Walter White') {
+          } else if (manager === 'Legal Team Lead: Walter White') {
             managerID = 7;
-         }
-        //  console.log('roleid: ', roleID, 'managerid: ', managerID)
+          } else if (manager === 'None') {
+            managerID = null;
+          }
+          //  console.log('roleid: ', roleID, 'managerid: ', managerID)
           connection.query('INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [fName, lName, roleID, managerID], (err, data) => {
-          if (err) throw err;
-          console.log(`Added ${fName} ` + `${lName} to database.`);
-          initialize();
+            if (err) throw err;
+            console.log(`Added ${fName} ` + `${lName} to database.`);
+            initialize();
           })
         })
     })
@@ -239,6 +244,7 @@ const updateEmployee = () => {
       if (err) throw err;
       const roles = [];
 
+      // add role names to a list
       data.forEach((title) => {
         roles.push(title.title);
       })
@@ -258,20 +264,22 @@ const updateEmployee = () => {
             name: 'role'
           },
         ]).then((choice) => {
-          console.log(choice);
+          // console.log(choice);
           let employee = choice.employee.split(' ');
           let roleID = roles.indexOf(choice.role) + 1;
 
-
-          if (roleID === 2) {
+          // set manager id's when roles are changed
+          if (roleID === 1 || 3 || 5 || 7) {
+            managerID = null;
+          } else if (roleID === 2) {
             managerID = 3;
           } else if (roleID === 4) {
             managerID = 6;
           } else if (roleID === 6) {
             managerID = 1;
-          } else if(roleID === 8) {
+          } else if (roleID === 8) {
             managerID = 7;
-         }
+          }
 
           connection.query('UPDATE employees SET role_id = ?, manager_id = ? WHERE first_name = ?', [roleID, managerID, employee[0]], (err, data) => {
             if (err) throw err;
